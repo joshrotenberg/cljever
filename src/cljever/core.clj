@@ -21,7 +21,13 @@
 
 (defn response-handler
   [{:keys [status headers body error opts] :as response}]
+;;  (if (= :put (-> response :opts :method))
+  ;;(prn response))
   {:status status :body (json/parse-string body true)})
+
+(defn transform-where-clause
+  [clause]
+  (json/generate-string clause))
 
 (defmacro defcljever
   "Generate a Clever API call function. Takes the function name, doc,
@@ -38,8 +44,17 @@
         (apply ~fname (conj ~args {})))
        (~with-options
          (let [format-args# (first (split-with (complement map?) ~args))
+               cljever-params# (last ~with-options)
+               resource# (apply format ~resource format-args#)
                options# {:basic-auth [*user* *password*]
-                         :query-params (last ~with-options)
-                         :user-agent *user-agent*}
-               resource# (apply format ~resource format-args#)]
-           (~http-fn (str *api-url* "/" *api-version* resource#) options# response-handler))))))
+                         :query-params cljever-params#
+                         :user-agent *user-agent*}]
+           ;; build the request and process either a where clause if this is a get and one is present,
+           ;; or process properties if this is a put
+           (~http-fn (str *api-url* "/" *api-version* resource#)
+                     (if (= ~method :get)
+                       (if-let [where-clause# (:where cljever-params#)]
+                         (assoc-in options# [:query-params :where] (json/generate-string where-clause#))
+                         options#)
+                       (assoc (dissoc options# :query-params) :body (json/generate-string cljever-params#)))
+                     response-handler))))))
