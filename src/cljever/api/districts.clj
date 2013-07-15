@@ -16,3 +16,4 @@
 (defdistricts status    "Retrieve all admins in a district" :get "%s/status" [id])
 (defdistricts add-properties    "Add properties to a district" :put "%s/properties" [id])
 (defdistricts properties    "Retrieve all properties for a district" :get "%s/properties" [id])
+

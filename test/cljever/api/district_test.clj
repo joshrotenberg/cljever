@@ -2,12 +2,13 @@
   (:use midje.sweet)
   (:use clojure.pprint)
   (:require [cljever.core :refer :all]
+            [cljever.api.common :refer :all]
             [cljever.api.districts :as d]))
 
 (facts "about district api calls"
        (with-auth "DEMO_KEY" ""
          (facts "about the districts call"
-                (let [res @(d/districts)]
+                (let [res (d/districts)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body)
@@ -19,7 +20,7 @@
 
          (facts "about the district call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/district id)]
+                      res (d/district id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body)
@@ -28,7 +29,7 @@
                         (-> res :body :data :name) => "Demo District"
                         (-> res :body :data :id) => id)
                   (fact "the call can include second level endpoints"
-                        (let [res (-> @(d/district id {:include "sections,schools"}) :body :data)
+                        (let [res (-> (d/district id {:include "sections,schools"}) :body :data)
                               sections (:sections res)
                               schools (:schools res)]
                           (-> sections :paging :count) => (count (:data sections))
@@ -44,7 +45,7 @@
 
          (facts "about the district schools call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/schools id)]
+                      res (d/schools id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body)
@@ -57,11 +58,11 @@
                         (get-in (first (-> res :body :data)) [:data :principal :email]) =>
                         "eda_barrows@mailinator.com")
                   (fact "the call can include more parameters"
-                        (let [school-count @(d/schools id {:count true})
-                              school-limit @(d/schools id {:limit 2 :page 1})
-                              school-where1 @(d/schools id {:where {:school_number "9255"}})
-                              school-where2 @(d/schools id {:where {:school_number {:$ne "9255"}}})
-                              school-sorted @(d/schools id {:sort "principal.name"})]
+                        (let [school-count (d/schools id {:count true})
+                              school-limit (d/schools id {:limit 2 :page 1})
+                              school-where1 (d/schools id {:where {:school_number "9255"}})
+                              school-where2 (d/schools id {:where {:school_number {:$ne "9255"}}})
+                              school-sorted (d/schools id {:sort "principal.name"})]
 
                           (-> school-count :body :count) => 4
                           (-> school-limit :body :paging :total) => (count (-> school-limit :body :data))
@@ -72,42 +73,42 @@
 
          (facts "about the district teachers call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/teachers id)]
+                      res (d/teachers id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body))))
 
          (facts "about the district students call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/students id)]
+                      res (d/students id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body))))
 
          (facts "about the district sections call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/sections id)]
+                      res (d/sections id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body))))
 
          (facts "about the district admins call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/admins id)]
+                      res (d/admins id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body))))
 
          (facts "about the district events call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/events id)]
+                      res (d/events id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body))))
 
          (facts "about the district status call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/status id)]
+                      res (d/status id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (keys res) => '(:status :body))))
@@ -116,7 +117,7 @@
          ;; get back a 200 with an error code telling us this
          (facts "about the district add-properties call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/add-properties id {:my-property-name "my property value"})]
+                      res (d/add-properties id {:my-property-name "my property value"})]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (-> res :body :code) => 6
@@ -124,10 +125,11 @@
 
          (facts "about the district properties call"
                 (let [id "4fd43cc56d11340000000005"
-                      res @(d/properties id)]
+                      res (d/properties id)]
                   (fact "returns a valid response"
                         (:status res) => 200
                         (-> res :body :code) => 12
-                        (keys res) => '(:status :body))))
+                        (keys res) => '(:status :body))))))
 
-         ))
+
+

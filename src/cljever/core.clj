@@ -21,8 +21,7 @@
 
 (defn response-handler
   [{:keys [status headers body error opts] :as response}]
-;;  (if (= :put (-> response :opts :method))
-  ;;(prn response))
+;;  (prn opts)
   {:status status :body (json/parse-string body true)})
 
 (defn transform-where-clause
@@ -51,10 +50,15 @@
                          :user-agent *user-agent*}]
            ;; build the request and process either a where clause if this is a get and one is present,
            ;; or process properties if this is a put
-           (~http-fn (str *api-url* "/" *api-version* resource#)
-                     (if (= ~method :get)
-                       (if-let [where-clause# (:where cljever-params#)]
-                         (assoc-in options# [:query-params :where] (json/generate-string where-clause#))
-                         options#)
-                       (assoc (dissoc options# :query-params) :body (json/generate-string cljever-params#)))
-                     response-handler))))))
+           (let [response# @(~http-fn (str *api-url* "/" *api-version* resource#)
+                                      (if (= ~method :get)
+                                        (if-let [where-clause# (:where cljever-params#)]
+                                          (assoc-in options# [:query-params :where]
+                                                    (json/generate-string where-clause#))
+                                          options#)
+                                        (assoc (dissoc options# :query-params) :body 
+                                               (json/generate-string cljever-params#))))]
+             (if-let [error# (:error response#)]
+               {:error error#}
+               {:status (:status response#)
+                :body (json/parse-string (:body response#) true)})))))))
