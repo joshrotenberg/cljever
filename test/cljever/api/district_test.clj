@@ -2,7 +2,6 @@
   (:use midje.sweet)
   (:use clojure.pprint)
   (:require [cljever.core :refer :all]
-            [cljever.api.common :refer :all]
             [cljever.api.districts :as d]))
 
 (facts "about district api calls"

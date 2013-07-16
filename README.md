@@ -1,7 +1,6 @@
 # cljever
 
-A Clojure library for the [Clever](http://getclever.com) API.
-
+A Clojure library for the [Clever](http://getclever.com) API. See their [developer](https://getclever.com/developers/) API (docs)[https://getclever.com/developers/docs/) for more info.
 
 ## Usage
 
@@ -10,7 +9,6 @@ A Clojure library for the [Clever](http://getclever.com) API.
 (ns your.name.space
     (:require [cljever.core :as cljever]
     	      [cljerver.api.districts :as d]))
-
 
 (cljever/with-auth "DEMO_KEY" ""
     (let [districts (d/districts)
